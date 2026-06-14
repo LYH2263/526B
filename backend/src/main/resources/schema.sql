@@ -104,3 +104,19 @@ CREATE TABLE IF NOT EXISTS purchase_request_log (
     INDEX idx_request_id (request_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS reading_progress (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    book_title VARCHAR(255) NOT NULL COMMENT '书名快照',
+    book_author VARCHAR(255) NOT NULL COMMENT '作者快照',
+    current_page INT NOT NULL DEFAULT 1 COMMENT '当前页码',
+    total_pages INT NOT NULL DEFAULT 100 COMMENT '总页数',
+    progress_percent DECIMAL(5,2) NOT NULL DEFAULT 0.00 COMMENT '阅读百分比',
+    last_read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最近阅读时间',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    UNIQUE KEY uk_user_book (user_id, book_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_last_read (user_id, last_read_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

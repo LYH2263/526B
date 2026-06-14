@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import BookList from './pages/BookList';
 import OrderList from './pages/OrderList';
 import PurchaseRequestList from './pages/PurchaseRequestList';
+import Reader from './pages/Reader';
 import Login from './components/Login';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
+import ContinueReading from './components/ContinueReading';
 import request from './api/request';
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
   const [checkoutData, setCheckoutData] = useState({ items: [], totalAmount: 0 });
   const [orderResult, setOrderResult] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [readingBook, setReadingBook] = useState(null);
+  const continueReadingRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -80,6 +84,26 @@ function App() {
   const handleViewOrders = () => {
     setIsOrderSuccessOpen(false);
     setCurrentPage('orders');
+  };
+
+  const handleReadBook = (book) => {
+    const bookData = {
+      id: book.bookId || book.id,
+      title: book.bookTitle || book.title,
+      author: book.bookAuthor || book.author
+    };
+    setReadingBook(bookData);
+    setCurrentPage('reader');
+  };
+
+  const handleBackFromReader = () => {
+    setReadingBook(null);
+    setCurrentPage('books');
+    if (continueReadingRef.current && continueReadingRef.current.refresh) {
+      setTimeout(() => {
+        continueReadingRef.current.refresh && continueReadingRef.current.refresh();
+      }, 200);
+    }
   };
 
   if (!user) {
@@ -249,8 +273,18 @@ function App() {
        </div>
 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {currentPage === 'reader' && readingBook && (
+                <Reader book={readingBook} user={user} onBack={handleBackFromReader} />
+            )}
             {currentPage === 'books' && (
-                <BookList user={user} onAddToCart={handleAddToCart} />
+                <>
+                    <ContinueReading 
+                        ref={continueReadingRef}
+                        user={user} 
+                        onReadBook={handleReadBook} 
+                    />
+                    <BookList user={user} onAddToCart={handleAddToCart} onReadBook={handleReadBook} />
+                </>
             )}
             {currentPage === 'orders' && (
                 <OrderList user={user} onBack={() => setCurrentPage('books')} />

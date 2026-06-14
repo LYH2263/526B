@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.OrderItemMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_item (order_id, book_id, book_title, book_author, price, quantity, subtotal)
+        VALUES (#{orderId}, #{bookId}, #{bookTitle}, #{bookAuthor}, #{price}, #{quantity}, #{subtotal})
+    </insert>
+
+    <select id="findByOrderId" resultType="com.example.book.entity.OrderItem">
+        SELECT id, order_id, book_id, book_title, book_author, price, quantity, subtotal, created_at
+        FROM order_item
+        WHERE order_id = #{orderId}
+    </select>
+
+</mapper>

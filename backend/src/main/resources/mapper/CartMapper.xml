@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.CartMapper">
+
+    <resultMap id="CartVOMap" type="com.example.book.vo.CartVO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookTitle" column="title"/>
+        <result property="bookAuthor" column="author"/>
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="CartVOMap">
+        SELECT c.id, c.user_id, c.book_id, b.title, b.author, b.price, c.quantity
+        FROM cart c
+        LEFT JOIN book b ON c.book_id = b.id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.updated_at DESC
+    </select>
+
+    <select id="findByUserIdAndBookId" resultType="com.example.book.entity.Cart">
+        SELECT id, user_id, book_id, quantity, created_at, updated_at
+        FROM cart
+        WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cart (user_id, book_id, quantity)
+        VALUES (#{userId}, #{bookId}, #{quantity})
+    </insert>
+
+    <update id="updateQuantity">
+        UPDATE cart
+        SET quantity = #{quantity}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM cart WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserIdAndBookId">
+        DELETE FROM cart WHERE user_id = #{userId} AND book_id = #{bookId}
+    </delete>
+
+    <delete id="clearByUserId">
+        DELETE FROM cart WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

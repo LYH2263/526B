@@ -3,11 +3,12 @@ import request from '../api/request';
 import BookModal from '../components/BookModal';
 import DeleteModal from '../components/DeleteModal';
 
-const BookList = () => {
+const BookList = ({ user, onAddToCart }) => {
     const [books, setBooks] = useState([]);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [currentBook, setCurrentBook] = useState(null);
+    const [addingCartId, setAddingCartId] = useState(null);
 
     const fetchBooks = async () => {
         try {
@@ -47,12 +48,25 @@ const BookList = () => {
         }
     };
 
+    const handleAddToCart = async (book) => {
+        if (!user) return;
+        setAddingCartId(book.id);
+        try {
+            await request.post('/cart/add', { userId: user.id, bookId: book.id, quantity: 1 });
+            onAddToCart && onAddToCart(book);
+        } catch (e) {
+            alert(e.message || '加入购物车失败');
+        } finally {
+            setTimeout(() => setAddingCartId(null), 300);
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="p-8 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center bg-gradient-to-r from-gray-50 to-white gap-4">
                 <div>
                     <h2 className="text-2xl font-extrabold text-gray-800 tracking-tight">图书列表</h2>
-                    <p className="text-gray-500 text-sm mt-1">管理您的所有藏书信息</p>
+                    <p className="text-gray-500 text-sm mt-1">挑选您喜爱的图书加入购物车</p>
                 </div>
                 <button
                     onClick={handleAdd}
@@ -109,25 +123,44 @@ const BookList = () => {
                                 </td>
                                 <td className="px-6 py-5 text-gray-500 text-sm">{book.publishDate}</td>
                                 <td className="px-6 py-5 text-right">
-                                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div className="flex justify-end gap-2">
                                         <button
-                                            onClick={() => handleEdit(book)}
-                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            title="编辑"
+                                            onClick={() => handleAddToCart(book)}
+                                            disabled={addingCartId === book.id}
+                                            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 text-sm font-medium ${addingCartId === book.id ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-100'}`}
+                                            title="加入购物车"
                                         >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00 2 2h11a2 2 0 00 2-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
+                                            {addingCartId === book.id ? (
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                            )}
+                                            {addingCartId === book.id ? '已添加' : '加入购物车'}
                                         </button>
-                                        <button
-                                            onClick={() => handleDeleteClick(book)}
-                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="删除"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
+                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            <button
+                                                onClick={() => handleEdit(book)}
+                                                className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                title="编辑"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 00 2 2h11a2 2 0 00 2-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(book)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="删除"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

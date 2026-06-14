@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BookList from './pages/BookList';
 import OrderList from './pages/OrderList';
+import PurchaseRequestList from './pages/PurchaseRequestList';
 import Login from './components/Login';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
@@ -129,6 +130,11 @@ function App() {
                         label="我的订单"
                         iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />}
                     />
+                    <NavButton
+                        page="purchase"
+                        label="采购审批"
+                        iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4M9 13h6" />}
+                    />
                 </div>
             </div>
             
@@ -153,29 +159,79 @@ function App() {
                         {user.username.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm text-gray-600 font-medium">{user.username}</span>
+                    {user.role && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                            user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                            {user.role === 'ADMIN' ? '管理员' : '馆员'}
+                        </span>
+                    )}
                 </div>
 
                 <div className="md:hidden">
                     {currentPage === 'books' ? (
-                        <button
-                            onClick={() => setCurrentPage('orders')}
-                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                            title="我的订单"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setCurrentPage('orders')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="我的订单"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage('purchase')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="采购审批"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                                </svg>
+                            </button>
+                        </div>
+                    ) : currentPage === 'orders' ? (
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setCurrentPage('books')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="图书商城"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage('purchase')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="采购审批"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                                </svg>
+                            </button>
+                        </div>
                     ) : (
-                        <button
-                            onClick={() => setCurrentPage('books')}
-                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                            title="图书商城"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                            </svg>
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setCurrentPage('books')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="图书商城"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage('orders')}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                title="我的订单"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -198,6 +254,9 @@ function App() {
             )}
             {currentPage === 'orders' && (
                 <OrderList user={user} onBack={() => setCurrentPage('books')} />
+            )}
+            {currentPage === 'purchase' && (
+                <PurchaseRequestList user={user} />
             )}
         </main>
 

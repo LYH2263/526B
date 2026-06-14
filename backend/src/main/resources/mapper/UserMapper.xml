@@ -3,7 +3,11 @@
 <mapper namespace="com.example.book.mapper.UserMapper">
 
     <select id="findByUsername" resultType="com.example.book.entity.User">
-        SELECT id, username, password FROM users WHERE username = #{username}
+        SELECT id, username, password, role FROM users WHERE username = #{username}
+    </select>
+
+    <select id="findById" resultType="com.example.book.entity.User">
+        SELECT id, username, password, role FROM users WHERE id = #{id}
     </select>
 
 </mapper>

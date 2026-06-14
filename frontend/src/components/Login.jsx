@@ -106,8 +106,9 @@ const Login = ({ onLogin }) => {
                             ) : '立即登录'}
                         </button>
 
-                        <div className="text-center text-sm text-gray-400 mt-4">
-                            默认账号: admin / 123456
+                        <div className="text-center text-sm text-gray-400 mt-4 space-y-1">
+                            <div>管理员: admin / 123456</div>
+                            <div>馆员: librarian / 123456</div>
                         </div>
                     </form>
                 </div>

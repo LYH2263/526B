@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import request from '../api/request';
 import BookModal from '../components/BookModal';
 import DeleteModal from '../components/DeleteModal';
+import BookVersionHistory from '../components/BookVersionHistory';
 
 const BookList = ({ user, onAddToCart }) => {
     const [books, setBooks] = useState([]);
@@ -9,6 +10,8 @@ const BookList = ({ user, onAddToCart }) => {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [currentBook, setCurrentBook] = useState(null);
     const [addingCartId, setAddingCartId] = useState(null);
+    const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+    const [versionHistoryBook, setVersionHistoryBook] = useState(null);
 
     const fetchBooks = async () => {
         try {
@@ -36,6 +39,11 @@ const BookList = ({ user, onAddToCart }) => {
     const handleDeleteClick = (book) => {
         setCurrentBook(book);
         setIsDeleteOpen(true);
+    };
+
+    const handleVersionHistory = (book) => {
+        setVersionHistoryBook(book);
+        setIsVersionHistoryOpen(true);
     };
 
     const confirmDelete = async () => {
@@ -143,6 +151,15 @@ const BookList = ({ user, onAddToCart }) => {
                                         </button>
                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <button
+                                                onClick={() => handleVersionHistory(book)}
+                                                className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                                                title="修订历史"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </button>
+                                            <button
                                                 onClick={() => handleEdit(book)}
                                                 className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                                                 title="编辑"
@@ -185,6 +202,7 @@ const BookList = ({ user, onAddToCart }) => {
                 onClose={() => setIsEditOpen(false)}
                 onSuccess={fetchBooks}
                 bookToEdit={currentBook}
+                user={user}
             />
 
             <DeleteModal
@@ -192,6 +210,14 @@ const BookList = ({ user, onAddToCart }) => {
                 onClose={() => setIsDeleteOpen(false)}
                 onConfirm={confirmDelete}
                 bookTitle={currentBook?.title}
+            />
+
+            <BookVersionHistory
+                isOpen={isVersionHistoryOpen}
+                onClose={() => setIsVersionHistoryOpen(false)}
+                book={versionHistoryBook}
+                user={user}
+                onRollbackSuccess={fetchBooks}
             />
         </div>
     );

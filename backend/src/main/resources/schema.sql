@@ -7,6 +7,23 @@ CREATE TABLE IF NOT EXISTS book (
     description TEXT COMMENT '描述'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS book_version (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    version_number INT NOT NULL COMMENT '版本号',
+    modifier_name VARCHAR(50) NOT NULL COMMENT '修改人',
+    change_type VARCHAR(20) NOT NULL COMMENT '变更类型：CREATE-新建，UPDATE-修改，ROLLBACK-回滚',
+    title VARCHAR(255) NOT NULL COMMENT '书名快照',
+    author VARCHAR(255) NOT NULL COMMENT '作者快照',
+    price DECIMAL(10, 2) NOT NULL COMMENT '价格快照',
+    publish_date DATE COMMENT '出版日期快照',
+    description TEXT COMMENT '描述快照',
+    rollback_from_version INT COMMENT '回滚来源版本号（仅回滚类型有值）',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '版本创建时间',
+    INDEX idx_book_id (book_id),
+    INDEX idx_book_version (book_id, version_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',

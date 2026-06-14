@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import request from '../api/request';
 
-const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit }) => {
+const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit, user }) => {
     const [formData, setFormData] = useState({
         title: '',
         author: '',
@@ -28,9 +28,9 @@ const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit }) => {
         e.preventDefault();
         try {
             if (bookToEdit?.id) {
-                await request.put('/books', formData);
+                await request.put('/books', { ...formData, modifierName: user?.username || '未知' });
             } else {
-                await request.post('/books', formData);
+                await request.post('/books', { ...formData, modifierName: user?.username || '未知' });
             }
             onSuccess();
             onClose();

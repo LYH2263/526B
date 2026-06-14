@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.BookVersionMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO book_version (book_id, version_number, modifier_name, change_type,
+                                  title, author, price, publish_date, description, rollback_from_version)
+        VALUES (#{bookId}, #{versionNumber}, #{modifierName}, #{changeType},
+                #{title}, #{author}, #{price}, #{publishDate}, #{description}, #{rollbackFromVersion})
+    </insert>
+
+    <select id="findByBookId" resultType="com.example.book.entity.BookVersion">
+        SELECT id, book_id, version_number, modifier_name, change_type,
+               title, author, price, publish_date, description,
+               rollback_from_version, created_at
+        FROM book_version
+        WHERE book_id = #{bookId}
+        ORDER BY version_number ASC
+    </select>
+
+    <select id="findByBookIdAndVersionNumber" resultType="com.example.book.entity.BookVersion">
+        SELECT id, book_id, version_number, modifier_name, change_type,
+               title, author, price, publish_date, description,
+               rollback_from_version, created_at
+        FROM book_version
+        WHERE book_id = #{bookId} AND version_number = #{versionNumber}
+    </select>
+
+    <select id="findMaxVersionNumber" resultType="java.lang.Integer">
+        SELECT MAX(version_number) FROM book_version WHERE book_id = #{bookId}
+    </select>
+
+</mapper>

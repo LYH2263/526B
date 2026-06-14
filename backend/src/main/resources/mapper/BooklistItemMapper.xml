@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.BooklistItemMapper">
+
+    <resultMap id="BooklistItemMap" type="com.example.book.entity.BooklistItem">
+        <id property="id" column="id"/>
+        <result property="booklistId" column="booklist_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <resultMap id="BooklistItemVOMap" type="com.example.book.vo.BooklistItemVO" extends="BooklistItemMap">
+        <result property="title" column="title"/>
+        <result property="author" column="author"/>
+        <result property="price" column="price"/>
+        <result property="publishDate" column="publish_date"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="findByBooklistId" resultMap="BooklistItemVOMap">
+        SELECT bli.id, bli.booklist_id, bli.book_id, bli.sort_order, bli.created_at,
+               b.title, b.author, b.price, b.publish_date, b.description
+        FROM booklist_item bli
+        LEFT JOIN book b ON bli.book_id = b.id
+        WHERE bli.booklist_id = #{booklistId}
+        ORDER BY bli.sort_order ASC, bli.created_at ASC
+    </select>
+
+    <select id="findByBooklistIdAndBookId" resultMap="BooklistItemMap">
+        SELECT id, booklist_id, book_id, sort_order, created_at
+        FROM booklist_item
+        WHERE booklist_id = #{booklistId} AND book_id = #{bookId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO booklist_item (booklist_id, book_id, sort_order)
+        VALUES (#{booklistId}, #{bookId}, #{sortOrder})
+    </insert>
+
+    <update id="updateSortOrder">
+        UPDATE booklist_item SET sort_order = #{sortOrder} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM booklist_item WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByBooklistIdAndBookId">
+        DELETE FROM booklist_item WHERE booklist_id = #{booklistId} AND book_id = #{bookId}
+    </delete>
+
+    <delete id="deleteByBooklistId">
+        DELETE FROM booklist_item WHERE booklist_id = #{booklistId}
+    </delete>
+
+    <select id="countByBooklistId" resultType="int">
+        SELECT COUNT(*) FROM booklist_item WHERE booklist_id = #{booklistId}
+    </select>
+
+</mapper>

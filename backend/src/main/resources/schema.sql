@@ -146,3 +146,29 @@ CREATE TABLE IF NOT EXISTS points_record (
     INDEX idx_user_id (user_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS booklist (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL COMMENT '书单名称',
+    description TEXT COMMENT '书单简介',
+    cover_url VARCHAR(500) COMMENT '封面图片URL',
+    is_public TINYINT NOT NULL DEFAULT 0 COMMENT '是否公开：0-私有，1-公开',
+    user_id BIGINT NOT NULL COMMENT '创建用户ID',
+    share_token VARCHAR(64) COMMENT '公开分享Token（防枚举）',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_share_token (share_token),
+    INDEX idx_user_id (user_id),
+    INDEX idx_is_public (is_public)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS booklist_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    booklist_id BIGINT NOT NULL COMMENT '书单ID',
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序顺序（越小越靠前）',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    UNIQUE KEY uk_booklist_book (booklist_id, book_id),
+    INDEX idx_booklist_id (booklist_id),
+    INDEX idx_book_id (book_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

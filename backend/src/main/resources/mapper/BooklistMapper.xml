@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.BooklistMapper">
+
+    <resultMap id="BooklistMap" type="com.example.book.entity.Booklist">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="isPublic" column="is_public"/>
+        <result property="userId" column="user_id"/>
+        <result property="shareToken" column="share_token"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="BooklistVOMap" type="com.example.book.vo.BooklistVO" extends="BooklistMap">
+        <result property="bookCount" column="book_count"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="BooklistVOMap">
+        SELECT bl.id, bl.name, bl.description, bl.cover_url, bl.is_public, bl.user_id, bl.share_token, bl.created_at, bl.updated_at,
+               COUNT(bli.id) AS book_count
+        FROM booklist bl
+        LEFT JOIN booklist_item bli ON bl.id = bli.booklist_id
+        WHERE bl.user_id = #{userId}
+        GROUP BY bl.id
+        ORDER BY bl.updated_at DESC
+    </select>
+
+    <select id="findById" resultMap="BooklistMap">
+        SELECT id, name, description, cover_url, is_public, user_id, share_token, created_at, updated_at
+        FROM booklist
+        WHERE id = #{id}
+    </select>
+
+    <select id="findDetailById" resultMap="BooklistVOMap">
+        SELECT bl.id, bl.name, bl.description, bl.cover_url, bl.is_public, bl.user_id, bl.share_token, bl.created_at, bl.updated_at,
+               COUNT(bli.id) AS book_count
+        FROM booklist bl
+        LEFT JOIN booklist_item bli ON bl.id = bli.booklist_id
+        WHERE bl.id = #{id}
+        GROUP BY bl.id
+    </select>
+
+    <select id="findByShareToken" resultMap="BooklistVOMap">
+        SELECT bl.id, bl.name, bl.description, bl.cover_url, bl.is_public, bl.user_id, bl.share_token, bl.created_at, bl.updated_at,
+               COUNT(bli.id) AS book_count
+        FROM booklist bl
+        LEFT JOIN booklist_item bli ON bl.id = bli.booklist_id
+        WHERE bl.share_token = #{shareToken} AND bl.is_public = 1
+        GROUP BY bl.id
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO booklist (name, description, cover_url, is_public, user_id, share_token)
+        VALUES (#{name}, #{description}, #{coverUrl}, #{isPublic}, #{userId}, #{shareToken})
+    </insert>
+
+    <update id="update">
+        UPDATE booklist
+        SET name = #{name},
+            description = #{description},
+            cover_url = #{coverUrl},
+            is_public = #{isPublic}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM booklist WHERE id = #{id}
+    </delete>
+
+    <update id="updateShareToken">
+        UPDATE booklist SET share_token = #{shareToken} WHERE id = #{id}
+    </update>
+
+</mapper>

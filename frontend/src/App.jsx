@@ -4,6 +4,9 @@ import OrderList from './pages/OrderList';
 import PurchaseRequestList from './pages/PurchaseRequestList';
 import Reader from './pages/Reader';
 import MyLevel from './pages/MyLevel';
+import MyBooklists from './pages/MyBooklists';
+import BooklistDetail from './pages/BooklistDetail';
+import BooklistShare from './pages/BooklistShare';
 import Login from './components/Login';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
@@ -24,7 +27,34 @@ function App() {
   const [cartCount, setCartCount] = useState(0);
   const [readingBook, setReadingBook] = useState(null);
   const [pointsAccount, setPointsAccount] = useState(null);
+  const [selectedBooklistId, setSelectedBooklistId] = useState(null);
+  const [shareToken, setShareToken] = useState(null);
   const continueReadingRef = useRef(null);
+
+  const parseHash = () => {
+    const hash = window.location.hash.replace(/^#/, '');
+    if (hash.startsWith('/share/')) {
+      return { type: 'share', token: hash.substring(7) };
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    const route = parseHash();
+    if (route && route.type === 'share') {
+      setShareToken(route.token);
+    }
+    const handleHashChange = () => {
+      const r = parseHash();
+      if (r && r.type === 'share') {
+        setShareToken(r.token);
+      } else {
+        setShareToken(null);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -131,15 +161,32 @@ function App() {
     }
   };
 
+  const handleViewBooklistDetail = (booklist) => {
+    setSelectedBooklistId(booklist.id);
+    setCurrentPage('booklistDetail');
+  };
+
+  const handleBackFromBooklistDetail = () => {
+    setSelectedBooklistId(null);
+    setCurrentPage('booklists');
+  };
+
+  if (shareToken) {
+    return <BooklistShare shareToken={shareToken} />;
+  }
+
   if (!user) {
     return <Login onLogin={handleLogin} />;
   }
 
   const NavButton = ({ page, label, iconSvg }) => (
     <button
-      onClick={() => setCurrentPage(page)}
+      onClick={() => {
+        setCurrentPage(page);
+        if (page !== 'booklistDetail') setSelectedBooklistId(null);
+      }}
       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all ${
-        currentPage === page
+        currentPage === page || (page === 'booklists' && currentPage === 'booklistDetail')
           ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
           : 'text-gray-600 hover:bg-gray-100'
       }`}
@@ -175,6 +222,11 @@ function App() {
                         iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />}
                     />
                     <NavButton
+                        page="booklists"
+                        label="我的书单"
+                        iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />}
+                    />
+                    <NavButton
                         page="orders"
                         label="我的订单"
                         iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />}
@@ -208,7 +260,7 @@ function App() {
                     )}
                 </button>
 
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setCurrentPage('level')}>
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => { setCurrentPage('level'); setSelectedBooklistId(null); }}>
                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-[10px] text-white font-bold">
                         {user.username.charAt(0).toUpperCase()}
                     </div>
@@ -222,73 +274,6 @@ function App() {
                     )}
                     {pointsAccount && (
                         <LevelBadge level={pointsAccount.level} size="sm" showName={false} />
-                    )}
-                </div>
-
-                <div className="md:hidden">
-                    {currentPage === 'books' ? (
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setCurrentPage('orders')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="我的订单"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage('purchase')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="采购审批"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : currentPage === 'orders' ? (
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setCurrentPage('books')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="图书商城"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                                </svg>
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage('purchase')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="采购审批"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setCurrentPage('books')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="图书商城"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                                </svg>
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage('orders')}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                                title="我的订单"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                            </button>
-                        </div>
                     )}
                 </div>
 
@@ -319,8 +304,14 @@ function App() {
                     <BookList user={user} onAddToCart={handleAddToCart} onReadBook={handleReadBook} />
                 </>
             )}
+            {currentPage === 'booklists' && (
+                <MyBooklists user={user} onViewDetail={handleViewBooklistDetail} />
+            )}
+            {currentPage === 'booklistDetail' && selectedBooklistId && (
+                <BooklistDetail booklistId={selectedBooklistId} user={user} onBack={handleBackFromBooklistDetail} />
+            )}
             {currentPage === 'orders' && (
-                <OrderList user={user} onBack={() => setCurrentPage('books')} />
+                <OrderList user={user} onBack={() => { setCurrentPage('books'); setSelectedBooklistId(null); }} />
             )}
             {currentPage === 'purchase' && (
                 <PurchaseRequestList user={user} />

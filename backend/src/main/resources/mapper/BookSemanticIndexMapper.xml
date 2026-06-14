@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.BookSemanticIndexMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.book.entity.BookSemanticIndex">
+        <id column="id" property="id"/>
+        <result column="book_id" property="bookId"/>
+        <result column="content_text" property="contentText"/>
+        <result column="keywords" property="keywords"/>
+        <result column="genre_tags" property="genreTags"/>
+        <result column="audience_tags" property="audienceTags"/>
+        <result column="style_tags" property="styleTags"/>
+        <result column="embedding_vector" property="embeddingVector"/>
+        <result column="tfidf_scores" property="tfidfScores"/>
+        <result column="index_version" property="indexVersion"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index WHERE id = #{id}
+    </select>
+
+    <select id="findByBookId" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index WHERE book_id = #{bookId}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index
+    </select>
+
+    <insert id="insert" parameterType="com.example.book.entity.BookSemanticIndex" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO book_semantic_index (
+            book_id, content_text, keywords, genre_tags, audience_tags, 
+            style_tags, embedding_vector, tfidf_scores, index_version
+        ) VALUES (
+            #{bookId}, #{contentText}, #{keywords}, #{genreTags}, #{audienceTags},
+            #{styleTags}, #{embeddingVector}, #{tfidfScores}, #{indexVersion}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.book.entity.BookSemanticIndex">
+        UPDATE book_semantic_index
+        SET book_id = #{bookId},
+            content_text = #{contentText},
+            keywords = #{keywords},
+            genre_tags = #{genreTags},
+            audience_tags = #{audienceTags},
+            style_tags = #{styleTags},
+            embedding_vector = #{embeddingVector},
+            tfidf_scores = #{tfidfScores},
+            index_version = #{indexVersion}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM book_semantic_index WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByBookId">
+        DELETE FROM book_semantic_index WHERE book_id = #{bookId}
+    </delete>
+
+    <select id="findByGenreTag" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index 
+        WHERE FIND_IN_SET(#{tag}, genre_tags) > 0
+    </select>
+
+    <select id="findByAudienceTag" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index 
+        WHERE FIND_IN_SET(#{tag}, audience_tags) > 0
+    </select>
+
+    <select id="findByStyleTag" resultMap="BaseResultMap">
+        SELECT * FROM book_semantic_index 
+        WHERE FIND_IN_SET(#{tag}, style_tags) > 0
+    </select>
+
+</mapper>

@@ -7,6 +7,7 @@ import MyLevel from './pages/MyLevel';
 import MyBooklists from './pages/MyBooklists';
 import BooklistDetail from './pages/BooklistDetail';
 import BooklistShare from './pages/BooklistShare';
+import BookRecommend from './pages/BookRecommend';
 import Login from './components/Login';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
@@ -19,6 +20,7 @@ import { getPointsAccount, addLoginPoints } from './api/points';
 function App() {
   const [user, setUser] = useState(null);
   const [currentPage, setCurrentPage] = useState('books');
+  const [recommendBook, setRecommendBook] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isOrderSuccessOpen, setIsOrderSuccessOpen] = useState(false);
@@ -222,6 +224,11 @@ function App() {
                         iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />}
                     />
                     <NavButton
+                        page="recommend"
+                        label="智能荐书"
+                        iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l.707.707M21 12h-1m-1.364 5.636l-.707.707M12 21v-1m-6.364-1.636l-.707.707M3 12h1m1.364-5.636l.707-.707M9 4h6m-3 16a9 9 0 110-18 9 9 0 010 18z" />}
+                    />
+                    <NavButton
                         page="booklists"
                         label="我的书单"
                         iconSvg={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />}
@@ -303,6 +310,9 @@ function App() {
                     />
                     <BookList user={user} onAddToCart={handleAddToCart} onReadBook={handleReadBook} />
                 </>
+            )}
+            {currentPage === 'recommend' && (
+                <BookRecommend user={user} onAddToCart={handleAddToCart} onReadBook={handleReadBook} />
             )}
             {currentPage === 'booklists' && (
                 <MyBooklists user={user} onViewDetail={handleViewBooklistDetail} />

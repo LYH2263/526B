@@ -18,6 +18,9 @@ public class BookService {
     @Autowired
     private BookVersionMapper bookVersionMapper;
 
+    @Autowired
+    private SemanticIndexService semanticIndexService;
+
     public List<Book> findAll() {
         return bookMapper.findAll();
     }
@@ -31,13 +34,16 @@ public class BookService {
         if (book.getId() == null) {
             bookMapper.insert(book);
             createVersionSnapshot(book, modifierName, "CREATE", null);
+            semanticIndexService.buildIndexForBook(book.getId());
         } else {
             bookMapper.update(book);
             createVersionSnapshot(book, modifierName, "UPDATE", null);
+            semanticIndexService.rebuildIndexForBook(book.getId());
         }
     }
 
     public void deleteById(Long id) {
+        semanticIndexService.deleteIndexForBook(id);
         bookMapper.deleteById(id);
     }
 

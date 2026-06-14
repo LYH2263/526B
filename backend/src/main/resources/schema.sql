@@ -172,3 +172,23 @@ CREATE TABLE IF NOT EXISTS booklist_item (
     INDEX idx_booklist_id (booklist_id),
     INDEX idx_book_id (book_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS book_semantic_index (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    content_text TEXT NOT NULL COMMENT '用于语义分析的完整文本（书名+作者+简介）',
+    keywords TEXT COMMENT '提取的关键词JSON数组',
+    genre_tags VARCHAR(500) COMMENT '题材标签，逗号分隔',
+    audience_tags VARCHAR(500) COMMENT '受众标签，逗号分隔',
+    style_tags VARCHAR(500) COMMENT '风格标签，逗号分隔',
+    embedding_vector TEXT COMMENT '向量嵌入（JSON数组，可选）',
+    tfidf_scores TEXT COMMENT 'TF-IDF权重得分（JSON格式）',
+    index_version INT NOT NULL DEFAULT 1 COMMENT '索引版本号',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_book_id (book_id),
+    INDEX idx_book_id (book_id),
+    INDEX idx_genre_tags (genre_tags),
+    INDEX idx_audience_tags (audience_tags),
+    INDEX idx_style_tags (style_tags)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

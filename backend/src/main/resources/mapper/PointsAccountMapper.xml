@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.PointsAccountMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.book.entity.PointsAccount">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="total_points" property="totalPoints"/>
+        <result column="level" property="level"/>
+        <result column="version" property="version"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT id, user_id, total_points, level, version, created_at, updated_at
+        FROM points_account
+        WHERE user_id = #{userId}
+        FOR UPDATE
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO points_account (user_id, total_points, level, version)
+        VALUES (#{userId}, #{totalPoints}, #{level}, #{version})
+    </insert>
+
+    <update id="updatePointsAndLevel">
+        UPDATE points_account
+        SET total_points = #{points},
+            level = #{level},
+            version = version + 1
+        WHERE user_id = #{userId} AND version = #{version}
+    </update>
+
+    <update id="incrementPoints">
+        UPDATE points_account
+        SET total_points = total_points + #{points}
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

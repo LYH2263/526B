@@ -11,3 +11,7 @@ INSERT IGNORE INTO book_version (book_id, version_number, modifier_name, change_
 INSERT IGNORE INTO users (id, username, password, role) VALUES 
 (1, 'admin', '123456', 'ADMIN'),
 (2, 'librarian', '123456', 'LIBRARIAN');
+
+INSERT IGNORE INTO points_account (user_id, total_points, level, version) VALUES 
+(1, 0, 'COMMON', 0),
+(2, 0, 'COMMON', 0);

@@ -120,3 +120,29 @@ CREATE TABLE IF NOT EXISTS reading_progress (
     INDEX idx_user_id (user_id),
     INDEX idx_last_read (user_id, last_read_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS points_account (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL UNIQUE COMMENT '用户ID',
+    total_points INT NOT NULL DEFAULT 0 COMMENT '总积分',
+    level VARCHAR(20) NOT NULL DEFAULT 'COMMON' COMMENT '等级：COMMON-普通，SILVER-银，GOLD-金，DIAMOND-钻',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_user_id (user_id),
+    INDEX idx_level (level)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS points_record (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    points_change INT NOT NULL COMMENT '积分变化值（正为增加，负为减少）',
+    points_after INT NOT NULL COMMENT '变化后积分',
+    source_type VARCHAR(50) NOT NULL COMMENT '来源类型：LOGIN-登录，READ_BOOK-阅读，ADD_CART-加购，PLACE_ORDER-下单',
+    source_id VARCHAR(100) COMMENT '来源唯一标识（用于幂等去重）',
+    description VARCHAR(255) COMMENT '描述',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    UNIQUE KEY uk_user_source (user_id, source_type, source_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

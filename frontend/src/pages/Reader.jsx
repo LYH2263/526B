@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import request from '../api/request';
+import { addReadPoints } from '../api/points';
 
 const SAMPLE_CHAPTERS = [
     '第一章 初入江湖',
@@ -57,7 +58,7 @@ const SAMPLE_CHAPTERS = [
     '而他的故事，才刚刚开始...'
 ];
 
-const Reader = ({ book, user, onBack }) => {
+const Reader = ({ book, user, onBack, onPointsChange }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(SAMPLE_CHAPTERS.length);
     const [progress, setProgress] = useState(0);
@@ -84,7 +85,18 @@ const Reader = ({ book, user, onBack }) => {
 
     useEffect(() => {
         fetchProgress();
+        handleReadPoints();
     }, [fetchProgress]);
+
+    const handleReadPoints = async () => {
+        if (!user || !book) return;
+        try {
+            await addReadPoints(user.id, book.id);
+            onPointsChange && onPointsChange();
+        } catch (e) {
+            console.error('阅读积分获取失败', e);
+        }
+    };
 
     useEffect(() => {
         const percent = ((currentPage - 1) / (totalPages - 1)) * 100;

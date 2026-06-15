@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.TransferOrderMapper">
+
+    <resultMap id="TransferOrderMap" type="com.example.book.entity.TransferOrder">
+        <id property="id" column="id"/>
+        <result property="transferNo" column="transfer_no"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookTitle" column="book_title"/>
+        <result property="sourceBranchId" column="source_branch_id"/>
+        <result property="sourceBranchName" column="source_branch_name"/>
+        <result property="targetBranchId" column="target_branch_id"/>
+        <result property="targetBranchName" column="target_branch_name"/>
+        <result property="quantity" column="quantity"/>
+        <result property="status" column="status"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="version" column="version"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="shippedAt" column="shipped_at"/>
+        <result property="receivedAt" column="received_at"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO transfer_order (
+            transfer_no, book_id, book_title, source_branch_id, source_branch_name,
+            target_branch_id, target_branch_name, quantity, status, operator_id, operator_name,
+            remark, version
+        ) VALUES (
+            #{transferNo}, #{bookId}, #{bookTitle}, #{sourceBranchId}, #{sourceBranchName},
+            #{targetBranchId}, #{targetBranchName}, #{quantity}, #{status}, #{operatorId}, #{operatorName},
+            #{remark}, #{version}
+        )
+    </insert>
+
+    <select id="findById" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE id = #{id}
+    </select>
+
+    <select id="findByIdForUpdate" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE id = #{id} FOR UPDATE
+    </select>
+
+    <select id="findByTransferNo" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE transfer_no = #{transferNo}
+    </select>
+
+    <select id="findAll" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order ORDER BY created_at DESC
+    </select>
+
+    <select id="findByStatus" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE status = #{status} ORDER BY created_at DESC
+    </select>
+
+    <select id="findByBookId" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE book_id = #{bookId} ORDER BY created_at DESC
+    </select>
+
+    <select id="findBySourceBranchId" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE source_branch_id = #{sourceBranchId} ORDER BY created_at DESC
+    </select>
+
+    <select id="findByTargetBranchId" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE target_branch_id = #{targetBranchId} ORDER BY created_at DESC
+    </select>
+
+    <select id="findByBranchId" resultMap="TransferOrderMap">
+        SELECT * FROM transfer_order WHERE source_branch_id = #{branchId} OR target_branch_id = #{branchId} ORDER BY created_at DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE transfer_order
+        SET status = #{status},
+            version = version + 1,
+            operator_id = #{operatorId},
+            operator_name = #{operatorName},
+            cancel_reason = #{cancelReason},
+            shipped_at = CASE WHEN #{status} = 'IN_TRANSIT' THEN NOW() ELSE shipped_at END,
+            received_at = CASE WHEN #{status} = 'COMPLETED' THEN NOW() ELSE received_at END,
+            cancelled_at = CASE WHEN #{status} = 'CANCELLED' THEN NOW() ELSE cancelled_at END
+        WHERE id = #{id} AND version = #{version}
+    </update>
+
+</mapper>

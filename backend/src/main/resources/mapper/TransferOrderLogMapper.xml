@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.TransferOrderLogMapper">
+
+    <resultMap id="TransferOrderLogMap" type="com.example.book.entity.TransferOrderLog">
+        <id property="id" column="id"/>
+        <result property="transferOrderId" column="transfer_order_id"/>
+        <result property="fromStatus" column="from_status"/>
+        <result property="toStatus" column="to_status"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO transfer_order_log (
+            transfer_order_id, from_status, to_status, operator_id, operator_name, remark
+        ) VALUES (
+            #{transferOrderId}, #{fromStatus}, #{toStatus}, #{operatorId}, #{operatorName}, #{remark}
+        )
+    </insert>
+
+    <select id="findByTransferOrderId" resultMap="TransferOrderLogMap">
+        SELECT * FROM transfer_order_log WHERE transfer_order_id = #{transferOrderId} ORDER BY created_at ASC
+    </select>
+
+</mapper>

@@ -192,3 +192,75 @@ CREATE TABLE IF NOT EXISTS book_semantic_index (
     INDEX idx_audience_tags (audience_tags),
     INDEX idx_style_tags (style_tags)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS branch (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL COMMENT '分馆名称',
+    address VARCHAR(255) NOT NULL COMMENT '分馆地址',
+    latitude DECIMAL(10, 7) NOT NULL COMMENT '纬度',
+    longitude DECIMAL(10, 7) NOT NULL COMMENT '经度',
+    phone VARCHAR(20) COMMENT '联系电话',
+    business_hours VARCHAR(100) COMMENT '营业时间',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1-营业中，0-已关闭',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_name (name),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS book_stock (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    branch_id BIGINT NOT NULL COMMENT '分馆ID',
+    stock_quantity INT NOT NULL DEFAULT 0 COMMENT '库存数量',
+    available_quantity INT NOT NULL DEFAULT 0 COMMENT '可借数量',
+    in_transit_quantity INT NOT NULL DEFAULT 0 COMMENT '在途数量（调拨中）',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_book_branch (book_id, branch_id),
+    INDEX idx_book_id (book_id),
+    INDEX idx_branch_id (branch_id),
+    INDEX idx_available (branch_id, available_quantity)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS transfer_order (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    transfer_no VARCHAR(32) NOT NULL UNIQUE COMMENT '调拨单号',
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    book_title VARCHAR(255) NOT NULL COMMENT '书名快照',
+    source_branch_id BIGINT NOT NULL COMMENT '源分馆ID',
+    source_branch_name VARCHAR(100) NOT NULL COMMENT '源分馆名称快照',
+    target_branch_id BIGINT NOT NULL COMMENT '目标分馆ID',
+    target_branch_name VARCHAR(100) NOT NULL COMMENT '目标分馆名称快照',
+    quantity INT NOT NULL COMMENT '调拨数量',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT '状态：PENDING-待出库，IN_TRANSIT-在途，COMPLETED-已完成，CANCELLED-已取消',
+    operator_id BIGINT COMMENT '操作人ID',
+    operator_name VARCHAR(50) COMMENT '操作人姓名',
+    remark TEXT COMMENT '备注',
+    cancel_reason TEXT COMMENT '取消原因',
+    version INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    shipped_at DATETIME COMMENT '出库时间',
+    received_at DATETIME COMMENT '入库时间',
+    cancelled_at DATETIME COMMENT '取消时间',
+    INDEX idx_status (status),
+    INDEX idx_book_id (book_id),
+    INDEX idx_source_branch (source_branch_id),
+    INDEX idx_target_branch (target_branch_id),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS transfer_order_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    transfer_order_id BIGINT NOT NULL COMMENT '调拨单ID',
+    from_status VARCHAR(20) COMMENT '原状态',
+    to_status VARCHAR(20) NOT NULL COMMENT '目标状态',
+    operator_id BIGINT NOT NULL COMMENT '操作人ID',
+    operator_name VARCHAR(50) NOT NULL COMMENT '操作人姓名',
+    remark TEXT COMMENT '备注',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    INDEX idx_transfer_order_id (transfer_order_id),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

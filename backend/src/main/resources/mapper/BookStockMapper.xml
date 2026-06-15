@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.BookStockMapper">
+
+    <resultMap id="BookStockMap" type="com.example.book.entity.BookStock">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="branchId" column="branch_id"/>
+        <result property="stockQuantity" column="stock_quantity"/>
+        <result property="availableQuantity" column="available_quantity"/>
+        <result property="inTransitQuantity" column="in_transit_quantity"/>
+        <result property="version" column="version"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO book_stock (
+            book_id, branch_id, stock_quantity, available_quantity, in_transit_quantity, version
+        ) VALUES (
+            #{bookId}, #{branchId}, #{stockQuantity}, #{availableQuantity}, #{inTransitQuantity}, #{version}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE book_stock
+        SET stock_quantity = #{stockQuantity},
+            available_quantity = #{availableQuantity},
+            in_transit_quantity = #{inTransitQuantity},
+            version = version + 1
+        WHERE id = #{id} AND version = #{version}
+    </update>
+
+    <select id="findById" resultMap="BookStockMap">
+        SELECT * FROM book_stock WHERE id = #{id}
+    </select>
+
+    <select id="findByBookIdAndBranchId" resultMap="BookStockMap">
+        SELECT * FROM book_stock WHERE book_id = #{bookId} AND branch_id = #{branchId}
+    </select>
+
+    <select id="findByBookIdAndBranchIdForUpdate" resultMap="BookStockMap">
+        SELECT * FROM book_stock WHERE book_id = #{bookId} AND branch_id = #{branchId} FOR UPDATE
+    </select>
+
+    <select id="findByBookId" resultMap="BookStockMap">
+        SELECT * FROM book_stock WHERE book_id = #{bookId}
+    </select>
+
+    <select id="findByBranchId" resultMap="BookStockMap">
+        SELECT * FROM book_stock WHERE branch_id = #{branchId}
+    </select>
+
+    <update id="decreaseAvailable">
+        UPDATE book_stock
+        SET available_quantity = available_quantity - #{quantity},
+            in_transit_quantity = in_transit_quantity + #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+          AND available_quantity >= #{quantity}
+    </update>
+
+    <update id="increaseAvailable">
+        UPDATE book_stock
+        SET available_quantity = available_quantity + #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+    </update>
+
+    <update id="decreaseInTransit">
+        UPDATE book_stock
+        SET in_transit_quantity = in_transit_quantity - #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+          AND in_transit_quantity >= #{quantity}
+    </update>
+
+    <update id="increaseInTransit">
+        UPDATE book_stock
+        SET in_transit_quantity = in_transit_quantity + #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+    </update>
+
+    <update id="decreaseStockAndAvailable">
+        UPDATE book_stock
+        SET stock_quantity = stock_quantity - #{quantity},
+            available_quantity = available_quantity - #{quantity},
+            in_transit_quantity = in_transit_quantity + #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+          AND available_quantity >= #{quantity}
+    </update>
+
+    <update id="increaseStockAndAvailable">
+        UPDATE book_stock
+        SET stock_quantity = stock_quantity + #{quantity},
+            available_quantity = available_quantity + #{quantity},
+            version = version + 1
+        WHERE book_id = #{bookId} AND branch_id = #{branchId} AND version = #{version}
+    </update>
+
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.book.mapper.PriceHistoryMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO price_history (book_id, old_price, new_price, modifier_name, change_reason)
+        VALUES (#{bookId}, #{oldPrice}, #{newPrice}, #{modifierName}, #{changeReason})
+    </insert>
+
+    <select id="findByBookId" resultType="com.example.book.entity.PriceHistory">
+        SELECT id, book_id, old_price, new_price, modifier_name, change_reason, created_at
+        FROM price_history
+        WHERE book_id = #{bookId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findByBookIdAndTimeRange" resultType="com.example.book.entity.PriceHistory">
+        SELECT id, book_id, old_price, new_price, modifier_name, change_reason, created_at
+        FROM price_history
+        WHERE book_id = #{bookId}
+          AND created_at &gt;= #{startTime}
+          AND created_at &lt;= #{endTime}
+        ORDER BY created_at DESC
+    </select>
+
+</mapper>

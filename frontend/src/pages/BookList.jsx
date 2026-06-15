@@ -3,6 +3,7 @@ import request from '../api/request';
 import BookModal from '../components/BookModal';
 import DeleteModal from '../components/DeleteModal';
 import BookVersionHistory from '../components/BookVersionHistory';
+import BookPriceHistory from '../components/BookPriceHistory';
 
 const BookList = ({ user, onAddToCart, onReadBook }) => {
     const [books, setBooks] = useState([]);
@@ -12,6 +13,8 @@ const BookList = ({ user, onAddToCart, onReadBook }) => {
     const [addingCartId, setAddingCartId] = useState(null);
     const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
     const [versionHistoryBook, setVersionHistoryBook] = useState(null);
+    const [isPriceHistoryOpen, setIsPriceHistoryOpen] = useState(false);
+    const [priceHistoryBook, setPriceHistoryBook] = useState(null);
 
     const fetchBooks = async () => {
         try {
@@ -44,6 +47,11 @@ const BookList = ({ user, onAddToCart, onReadBook }) => {
     const handleVersionHistory = (book) => {
         setVersionHistoryBook(book);
         setIsVersionHistoryOpen(true);
+    };
+
+    const handlePriceHistory = (book) => {
+        setPriceHistoryBook(book);
+        setIsPriceHistoryOpen(true);
     };
 
     const confirmDelete = async () => {
@@ -175,6 +183,15 @@ const BookList = ({ user, onAddToCart, onReadBook }) => {
                                         </button>
                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <button
+                                                onClick={() => handlePriceHistory(book)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="价格历史"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                                                </svg>
+                                            </button>
+                                            <button
                                                 onClick={() => handleVersionHistory(book)}
                                                 className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
                                                 title="修订历史"
@@ -242,6 +259,12 @@ const BookList = ({ user, onAddToCart, onReadBook }) => {
                 book={versionHistoryBook}
                 user={user}
                 onRollbackSuccess={fetchBooks}
+            />
+
+            <BookPriceHistory
+                isOpen={isPriceHistoryOpen}
+                onClose={() => setIsPriceHistoryOpen(false)}
+                book={priceHistoryBook}
             />
         </div>
     );

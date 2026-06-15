@@ -24,6 +24,9 @@ public class BookService {
     @Autowired
     private ImageService imageService;
 
+    @Autowired
+    private PriceHistoryService priceHistoryService;
+
     public List<Book> findAll() {
         return bookMapper.findAll();
     }
@@ -34,6 +37,11 @@ public class BookService {
 
     @Transactional
     public void save(Book book, String modifierName) {
+        save(book, modifierName, null);
+    }
+
+    @Transactional
+    public void save(Book book, String modifierName, String changeReason) {
         if (book.getId() == null) {
             bookMapper.insert(book);
             createVersionSnapshot(book, modifierName, "CREATE", null);
@@ -42,6 +50,13 @@ public class BookService {
             Book oldBook = bookMapper.findById(book.getId());
             if (oldBook != null) {
                 cleanupOldCoverIfChanged(oldBook, book);
+                priceHistoryService.recordPriceChange(
+                        book.getId(),
+                        oldBook.getPrice(),
+                        book.getPrice(),
+                        modifierName,
+                        changeReason
+                );
             }
             bookMapper.update(book);
             createVersionSnapshot(book, modifierName, "UPDATE", null);

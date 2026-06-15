@@ -270,3 +270,15 @@ CREATE TABLE IF NOT EXISTS transfer_order_log (
     INDEX idx_transfer_order_id (transfer_order_id),
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS price_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    book_id BIGINT NOT NULL COMMENT '图书ID',
+    old_price DECIMAL(10, 2) NOT NULL COMMENT '旧价格',
+    new_price DECIMAL(10, 2) NOT NULL COMMENT '新价格',
+    modifier_name VARCHAR(50) NOT NULL COMMENT '变更人',
+    change_reason VARCHAR(500) COMMENT '变更原因（可选）',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '变更时间',
+    INDEX idx_book_id (book_id),
+    INDEX idx_book_created (book_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

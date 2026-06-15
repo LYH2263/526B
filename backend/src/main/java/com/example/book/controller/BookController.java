@@ -2,7 +2,10 @@ package com.example.book.controller;
 
 import com.example.book.common.Result;
 import com.example.book.entity.Book;
+import com.example.book.entity.PriceHistory;
 import com.example.book.service.BookService;
+import com.example.book.service.PriceHistoryService;
+import com.example.book.vo.PriceStatsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,9 @@ public class BookController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private PriceHistoryService priceHistoryService;
 
     @GetMapping
     public Result<List<Book>> list() {
@@ -30,7 +36,8 @@ public class BookController {
     public Result<Void> save(@RequestBody Map<String, Object> body) {
         Book book = mapToBook(body);
         String modifierName = (String) body.getOrDefault("modifierName", "未知");
-        bookService.save(book, modifierName);
+        String changeReason = (String) body.get("changeReason");
+        bookService.save(book, modifierName, changeReason);
         return Result.success(null);
     }
 
@@ -38,7 +45,8 @@ public class BookController {
     public Result<Void> update(@RequestBody Map<String, Object> body) {
         Book book = mapToBook(body);
         String modifierName = (String) body.getOrDefault("modifierName", "未知");
-        bookService.save(book, modifierName);
+        String changeReason = (String) body.get("changeReason");
+        bookService.save(book, modifierName, changeReason);
         return Result.success(null);
     }
 
@@ -46,6 +54,20 @@ public class BookController {
     public Result<Void> delete(@PathVariable Long id) {
         bookService.deleteById(id);
         return Result.success(null);
+    }
+
+    @GetMapping("/{id}/price-history")
+    public Result<List<PriceHistory>> getPriceHistory(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "all") String range) {
+        return Result.success(priceHistoryService.getPriceHistoryByRange(id, range));
+    }
+
+    @GetMapping("/{id}/price-stats")
+    public Result<PriceStatsVO> getPriceStats(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "all") String range) {
+        return Result.success(priceHistoryService.getPriceStats(id, range));
     }
 
     @SuppressWarnings("unchecked")

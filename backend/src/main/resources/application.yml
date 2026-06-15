@@ -5,6 +5,10 @@ server:
       charset: UTF-8
       force: true
       enabled: true
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+      enabled: true
 
 spring:
   datasource:
@@ -27,3 +31,22 @@ recommendation:
     mode: keyword
     min-score: 0.1
     use-embedding: false
+
+storage:
+  type: local
+  local:
+    base-path: ./uploads
+    url-prefix: /uploads
+  thumbnail:
+    list:
+      width: 120
+      height: 160
+      quality: 0.85
+    detail:
+      width: 400
+      height: 540
+      quality: 0.9
+  watermark:
+    enabled: true
+    text: Library
+    opacity: 0.3

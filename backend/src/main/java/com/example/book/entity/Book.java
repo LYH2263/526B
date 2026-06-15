@@ -12,4 +12,7 @@ public class Book {
     private BigDecimal price;
     private LocalDate publishDate;
     private String description;
+    private String coverUrl;
+    private String coverThumbList;
+    private String coverThumbDetail;
 }

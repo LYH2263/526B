@@ -16,6 +16,8 @@ backend/target/
 *.jar
 *.war
 *.log
+backend/uploads/
+uploads/
 
 # ---------- Frontend (Node / Vite) ----------
 frontend/node_modules/

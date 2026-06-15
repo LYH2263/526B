@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import request from '../api/request';
+import ImageUploader from './ImageUploader';
 
 const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit, user }) => {
     const [formData, setFormData] = useState({
@@ -7,35 +8,76 @@ const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit, user }) => {
         author: '',
         price: '',
         publishDate: '',
-        description: ''
+        description: '',
+        coverUrl: '',
+        coverThumbList: '',
+        coverThumbDetail: ''
     });
+
+    const [coverImage, setCoverImage] = useState(null);
 
     useEffect(() => {
         if (bookToEdit) {
             setFormData(bookToEdit);
+            if (bookToEdit.coverUrl) {
+                setCoverImage({
+                    originalUrl: bookToEdit.coverUrl,
+                    thumbListUrl: bookToEdit.coverThumbList,
+                    thumbDetailUrl: bookToEdit.coverThumbDetail
+                });
+            } else {
+                setCoverImage(null);
+            }
         } else {
             setFormData({
                 title: '',
                 author: '',
                 price: '',
                 publishDate: '',
-                description: ''
+                description: '',
+                coverUrl: '',
+                coverThumbList: '',
+                coverThumbDetail: ''
             });
+            setCoverImage(null);
         }
     }, [bookToEdit, isOpen]);
+
+    const handleCoverChange = (result) => {
+        if (result) {
+            setCoverImage(result);
+            setFormData({
+                ...formData,
+                coverUrl: result.originalUrl,
+                coverThumbList: result.thumbListUrl,
+                coverThumbDetail: result.thumbDetailUrl
+            });
+        } else {
+            setCoverImage(null);
+            setFormData({
+                ...formData,
+                coverUrl: '',
+                coverThumbList: '',
+                coverThumbDetail: ''
+            });
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const submitData = {
+                ...formData,
+                modifierName: user?.username || '未知'
+            };
             if (bookToEdit?.id) {
-                await request.put('/books', { ...formData, modifierName: user?.username || '未知' });
+                await request.put('/books', submitData);
             } else {
-                await request.post('/books', { ...formData, modifierName: user?.username || '未知' });
+                await request.post('/books', submitData);
             }
             onSuccess();
             onClose();
         } catch (error) {
-            // Error handled by interceptor
         }
     };
 
@@ -43,7 +85,7 @@ const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit, user }) => {
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 transition-all p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all scale-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                     <h2 className="text-xl font-bold text-gray-800">
                         {bookToEdit ? '编辑图书' : '新增图书'}
@@ -55,50 +97,63 @@ const BookModal = ({ isOpen, onClose, onSuccess, bookToEdit, user }) => {
                     </button>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">书名</label>
-                        <input
-                            type="text"
-                            required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                            placeholder="填写图书名称"
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">作者</label>
-                        <input
-                            type="text"
-                            required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                            placeholder="填写作者名字"
-                            value={formData.author}
-                            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-5">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">价格 (¥)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                required
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                                placeholder="0.00"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="md:col-span-1">
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">图书封面</label>
+                            <ImageUploader
+                                value={coverImage}
+                                onChange={handleCoverChange}
+                                maxSizeMB={10}
+                                quality={0.8}
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">出版日期</label>
-                            <input
-                                type="date"
-                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                                value={formData.publishDate}
-                                onChange={(e) => setFormData({ ...formData, publishDate: e.target.value })}
-                            />
+                        <div className="md:col-span-2 space-y-5">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">书名</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="填写图书名称"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">作者</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    placeholder="填写作者名字"
+                                    value={formData.author}
+                                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">价格 (¥)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        required
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        placeholder="0.00"
+                                        value={formData.price}
+                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">出版日期</label>
+                                    <input
+                                        type="date"
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                        value={formData.publishDate}
+                                        onChange={(e) => setFormData({ ...formData, publishDate: e.target.value })}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div>

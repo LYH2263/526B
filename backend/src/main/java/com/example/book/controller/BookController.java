@@ -63,6 +63,9 @@ public class BookController {
             book.setPublishDate(java.time.LocalDate.parse(body.get("publishDate").toString()));
         }
         book.setDescription((String) body.get("description"));
+        book.setCoverUrl((String) body.get("coverUrl"));
+        book.setCoverThumbList((String) body.get("coverThumbList"));
+        book.setCoverThumbDetail((String) body.get("coverThumbDetail"));
         return book;
     }
 }

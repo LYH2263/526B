@@ -21,6 +21,9 @@ public class BookService {
     @Autowired
     private SemanticIndexService semanticIndexService;
 
+    @Autowired
+    private ImageService imageService;
+
     public List<Book> findAll() {
         return bookMapper.findAll();
     }
@@ -36,15 +39,53 @@ public class BookService {
             createVersionSnapshot(book, modifierName, "CREATE", null);
             semanticIndexService.buildIndexForBook(book.getId());
         } else {
+            Book oldBook = bookMapper.findById(book.getId());
+            if (oldBook != null) {
+                cleanupOldCoverIfChanged(oldBook, book);
+            }
             bookMapper.update(book);
             createVersionSnapshot(book, modifierName, "UPDATE", null);
             semanticIndexService.rebuildIndexForBook(book.getId());
         }
     }
 
+    @Transactional
     public void deleteById(Long id) {
+        Book book = bookMapper.findById(id);
+        if (book != null) {
+            imageService.deleteCoverImage(
+                    extractPathFromUrl(book.getCoverUrl()),
+                    extractPathFromUrl(book.getCoverThumbList()),
+                    extractPathFromUrl(book.getCoverThumbDetail())
+            );
+        }
         semanticIndexService.deleteIndexForBook(id);
         bookMapper.deleteById(id);
+    }
+
+    private void cleanupOldCoverIfChanged(Book oldBook, Book newBook) {
+        String oldCover = oldBook.getCoverUrl();
+        String newCover = newBook.getCoverUrl();
+
+        if (oldCover != null && !oldCover.isEmpty()
+                && (newCover == null || !oldCover.equals(newCover))) {
+            imageService.deleteCoverImage(
+                    extractPathFromUrl(oldBook.getCoverUrl()),
+                    extractPathFromUrl(oldBook.getCoverThumbList()),
+                    extractPathFromUrl(oldBook.getCoverThumbDetail())
+            );
+        }
+    }
+
+    private String extractPathFromUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            return null;
+        }
+        int index = url.indexOf("/uploads/");
+        if (index != -1) {
+            return url.substring(index + "/uploads/".length());
+        }
+        return null;
     }
 
     private void createVersionSnapshot(Book book, String modifierName, String changeType, Integer rollbackFromVersion) {
@@ -61,6 +102,9 @@ public class BookService {
         version.setPrice(book.getPrice());
         version.setPublishDate(book.getPublishDate());
         version.setDescription(book.getDescription());
+        version.setCoverUrl(book.getCoverUrl());
+        version.setCoverThumbList(book.getCoverThumbList());
+        version.setCoverThumbDetail(book.getCoverThumbDetail());
         version.setRollbackFromVersion(rollbackFromVersion);
 
         bookVersionMapper.insert(version);

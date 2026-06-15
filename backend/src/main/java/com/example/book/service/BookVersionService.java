@@ -37,6 +37,9 @@ public class BookVersionService {
         version.setPrice(book.getPrice());
         version.setPublishDate(book.getPublishDate());
         version.setDescription(book.getDescription());
+        version.setCoverUrl(book.getCoverUrl());
+        version.setCoverThumbList(book.getCoverThumbList());
+        version.setCoverThumbDetail(book.getCoverThumbDetail());
         version.setRollbackFromVersion(rollbackFromVersion);
 
         bookVersionMapper.insert(version);
@@ -73,6 +76,7 @@ public class BookVersionService {
                 version1.getPublishDate() != null ? version1.getPublishDate().toString() : null,
                 version2.getPublishDate() != null ? version2.getPublishDate().toString() : null);
         addFieldDiff(diffs, "description", "简介", version1.getDescription(), version2.getDescription());
+        addFieldDiff(diffs, "coverUrl", "封面图片", version1.getCoverUrl(), version2.getCoverUrl());
 
         return diffs;
     }
@@ -111,6 +115,9 @@ public class BookVersionService {
         book.setPrice(targetVersion.getPrice());
         book.setPublishDate(targetVersion.getPublishDate());
         book.setDescription(targetVersion.getDescription());
+        book.setCoverUrl(targetVersion.getCoverUrl());
+        book.setCoverThumbList(targetVersion.getCoverThumbList());
+        book.setCoverThumbDetail(targetVersion.getCoverThumbDetail());
         bookMapper.update(book);
 
         Integer maxVersion = bookVersionMapper.findMaxVersionNumber(bookId);
@@ -126,6 +133,9 @@ public class BookVersionService {
         rollbackVersion.setPrice(book.getPrice());
         rollbackVersion.setPublishDate(book.getPublishDate());
         rollbackVersion.setDescription(book.getDescription());
+        rollbackVersion.setCoverUrl(book.getCoverUrl());
+        rollbackVersion.setCoverThumbList(book.getCoverThumbList());
+        rollbackVersion.setCoverThumbDetail(book.getCoverThumbDetail());
         rollbackVersion.setRollbackFromVersion(targetVersionNumber);
 
         bookVersionMapper.insert(rollbackVersion);

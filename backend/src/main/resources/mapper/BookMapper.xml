@@ -3,16 +3,16 @@
 <mapper namespace="com.example.book.mapper.BookMapper">
 
     <select id="findAll" resultType="com.example.book.entity.Book">
-        SELECT id, title, author, price, publish_date, description FROM book
+        SELECT id, title, author, price, publish_date, description, cover_url, cover_thumb_list, cover_thumb_detail FROM book
     </select>
 
     <select id="findById" resultType="com.example.book.entity.Book">
-        SELECT id, title, author, price, publish_date, description FROM book WHERE id = #{id}
+        SELECT id, title, author, price, publish_date, description, cover_url, cover_thumb_list, cover_thumb_detail FROM book WHERE id = #{id}
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO book (title, author, price, publish_date, description)
-        VALUES (#{title}, #{author}, #{price}, #{publishDate}, #{description})
+        INSERT INTO book (title, author, price, publish_date, description, cover_url, cover_thumb_list, cover_thumb_detail)
+        VALUES (#{title}, #{author}, #{price}, #{publishDate}, #{description}, #{coverUrl}, #{coverThumbList}, #{coverThumbDetail})
     </insert>
 
     <update id="update">
@@ -21,7 +21,10 @@
             author = #{author},
             price = #{price},
             publish_date = #{publishDate},
-            description = #{description}
+            description = #{description},
+            cover_url = #{coverUrl},
+            cover_thumb_list = #{coverThumbList},
+            cover_thumb_detail = #{coverThumbDetail}
         WHERE id = #{id}
     </update>
 

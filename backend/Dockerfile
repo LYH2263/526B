@@ -10,6 +10,7 @@ RUN mvn -s settings.xml -B package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
+RUN mkdir -p /app/uploads
 COPY --from=build /app/target/*.jar app.jar
 ENV LANG C.UTF-8
 EXPOSE 8526

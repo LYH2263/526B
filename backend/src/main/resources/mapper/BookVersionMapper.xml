@@ -4,14 +4,19 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO book_version (book_id, version_number, modifier_name, change_type,
-                                  title, author, price, publish_date, description, rollback_from_version)
+                                  title, author, price, publish_date, description,
+                                  cover_url, cover_thumb_list, cover_thumb_detail,
+                                  rollback_from_version)
         VALUES (#{bookId}, #{versionNumber}, #{modifierName}, #{changeType},
-                #{title}, #{author}, #{price}, #{publishDate}, #{description}, #{rollbackFromVersion})
+                #{title}, #{author}, #{price}, #{publishDate}, #{description},
+                #{coverUrl}, #{coverThumbList}, #{coverThumbDetail},
+                #{rollbackFromVersion})
     </insert>
 
     <select id="findByBookId" resultType="com.example.book.entity.BookVersion">
         SELECT id, book_id, version_number, modifier_name, change_type,
                title, author, price, publish_date, description,
+               cover_url, cover_thumb_list, cover_thumb_detail,
                rollback_from_version, created_at
         FROM book_version
         WHERE book_id = #{bookId}
@@ -21,6 +26,7 @@
     <select id="findByBookIdAndVersionNumber" resultType="com.example.book.entity.BookVersion">
         SELECT id, book_id, version_number, modifier_name, change_type,
                title, author, price, publish_date, description,
+               cover_url, cover_thumb_list, cover_thumb_detail,
                rollback_from_version, created_at
         FROM book_version
         WHERE book_id = #{bookId} AND version_number = #{versionNumber}

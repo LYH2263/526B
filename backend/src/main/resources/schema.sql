@@ -4,7 +4,10 @@ CREATE TABLE IF NOT EXISTS book (
     author VARCHAR(255) NOT NULL COMMENT '作者',
     price DECIMAL(10, 2) NOT NULL COMMENT '价格',
     publish_date DATE COMMENT '出版日期',
-    description TEXT COMMENT '描述'
+    description TEXT COMMENT '描述',
+    cover_url VARCHAR(500) COMMENT '原图封面URL',
+    cover_thumb_list VARCHAR(500) COMMENT '列表缩略图URL',
+    cover_thumb_detail VARCHAR(500) COMMENT '详情缩略图URL'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS book_version (
@@ -18,6 +21,9 @@ CREATE TABLE IF NOT EXISTS book_version (
     price DECIMAL(10, 2) NOT NULL COMMENT '价格快照',
     publish_date DATE COMMENT '出版日期快照',
     description TEXT COMMENT '描述快照',
+    cover_url VARCHAR(500) COMMENT '原图封面URL快照',
+    cover_thumb_list VARCHAR(500) COMMENT '列表缩略图URL快照',
+    cover_thumb_detail VARCHAR(500) COMMENT '详情缩略图URL快照',
     rollback_from_version INT COMMENT '回滚来源版本号（仅回滚类型有值）',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '版本创建时间',
     INDEX idx_book_id (book_id),

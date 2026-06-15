@@ -105,7 +105,21 @@ const BookList = ({ user, onAddToCart, onReadBook }) => {
                             <tr key={book.id} className="hover:bg-blue-50/30 transition-colors group">
                                 <td className="px-8 py-5">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-12 w-12 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg shadow-sm">
+                                        {book.coverThumbList ? (
+                                            <img
+                                                src={book.coverThumbList}
+                                                alt={book.title}
+                                                className="h-12 w-12 rounded-lg object-cover shadow-sm"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div
+                                            className={`h-12 w-12 rounded-lg bg-indigo-100 text-indigo-600 items-center justify-center font-bold text-lg shadow-sm ${book.coverThumbList ? 'hidden' : 'flex'}`}
+                                        >
                                             {book.title.charAt(0)}
                                         </div>
                                         <div>
